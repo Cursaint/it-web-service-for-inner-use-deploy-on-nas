@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>การถอด-ประกอบชิ้นส่วน | IT Service</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">IT</div>
+                <div>
+                    <h2>IT SERVICE</h2>
+                    <span>Support Service</span>
+                </div>
+            </div>
+
+            <nav class="navigation">
+                <p class="nav-label">เมนูหลัก</p>
+
+                <a href="/" class="nav-item">
+                    <span class="nav-icon">⌂</span>
+                    หน้าหลัก
+                </a>
+
+                <a href="/it-request" class="nav-item">
+                    <span class="nav-icon">＋</span>
+                    แจ้งปัญหา IT
+                </a>
+
+                <a href="/my-tickets" class="nav-item">
+                    <span class="nav-icon">▤</span>
+                    รายการคำร้อง
+                </a>
+
+                <a href="/assets" class="nav-item active">
+                    <span class="nav-icon">▣</span>
+                    ทะเบียนอุปกรณ์
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="avatar">IT</div>
+                <div class="user-info">
+                    <strong>ผู้ดูแลระบบ</strong>
+                    <span>Asset Manager</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <a href="/">หน้าหลัก</a> <span>/</span> <a href="/assets">ทะเบียนทรัพย์สิน</a> <span>/</span> การถอด-ประกอบชิ้นส่วน
+                </div>
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    Assembly Management
+                </div>
+            </header>
+
+            <section class="page-heading" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1>การถอด-ประกอบชิ้นส่วนคอมพิวเตอร์ (Assembly & Disassembly)</h1>
+                    <p>จัดการประกอบอุปกรณ์ CPU, RAM, Storage และการถอดชิ้นส่วนพร้อมเก็บบันทึกประวัติ</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a href="/assets/new?tab=component" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span>＋</span> เพิ่มชิ้นส่วนใหม่เข้าระบบ
+                    </a>
+                    <a href="/assets" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span>▣</span> ดูทะเบียนอุปกรณ์
+                    </a>
+                </div>
+            </section>
+
+            {% if success_message %}
+                <div class="success-message">
+                    {{ success_message }}
+                </div>
+            {% endif %}
+
+            {% if error_message %}
+                <div style="background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 14px 18px; border-radius: 10px; margin-bottom: 20px;">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+
+            <!-- เลือกเครื่องคอมพิวเตอร์ / อุปกรณ์ -->
+            <section class="form-section" style="background: white; padding: 20px 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 24px;">
+                <form action="/assets/assembly" method="get" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 280px;">
+                        <label for="select_pc" style="font-weight: 600; font-size: 14px; color: var(--text-primary); margin-bottom: 6px; display: block;">
+                            เลือกเครื่องคอมพิวเตอร์ / อุปกรณ์ที่ต้องการจัดการ:
+                        </label>
+                        <select id="select_pc" name="pc_id" onchange="this.form.submit()" style="width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 15px; background: white;">
+                            {% for pc in pc_list %}
+                                <option value="{{ pc.id }}" {% if selected_pc and selected_pc.id == pc.id %}selected{% endif %}>
+                                    {{ pc.service_tag }} — {{ pc.brand or '' }} {{ pc.model or '' }} {% if pc.machine_name %}({{ pc.machine_name }}){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="padding: 11px 20px;">
+                        เลือกเครื่อง
+                    </button>
+                </form>
+            </section>
+
+            {% if selected_pc %}
+            <!-- Card ข้อมูลเครื่องที่เลือก -->
+            <div class="pc-info-card">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                        <h2 style="margin: 0; font-size: 20px; color: var(--text-primary);">
+                            {{ selected_pc.service_tag }}
+                        </h2>
+                        <span class="type-badge type-pc">🖥️ {{ selected_pc.type }}</span>
+                    </div>
+                    <div style="color: var(--text-secondary); font-size: 14px;">
+                        <strong>{{ selected_pc.brand or '' }}</strong> {{ selected_pc.model or '' }}
+                        {% if selected_pc.machine_name %} &bull; ชื่อเครื่อง: <strong>{{ selected_pc.machine_name }}</strong>{% endif %}
+                    </div>
+                </div>
+
+                <div class="pc-info-meta">
+                    <div class="meta-item">
+                        <span class="label">วันที่ซื้อ</span>
+                        <span class="value">{{ selected_pc.buy_date.strftime('%d/%m/%Y') if selected_pc.buy_date else '-' }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">ราคา</span>
+                        <span class="value">
+                            {% if selected_pc.price and selected_pc.price > 0 %}฿{{ "{:,.2f}".format(selected_pc.price) }}{% else %}-{% endif %}
+                        </span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="label">ชิ้นส่วนปัจจุบัน</span>
+                        <span class="value" style="color: #2563eb;">{{ active_components|length }} ชิ้น</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 30px; align-items: start;">
+                
+                <!-- ชิ้นส่วนที่ประกอบอยู่ในเครื่อง ณ ปัจจุบัน -->
+                <section class="form-section" style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div class="section-heading" style="margin: 0;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                    <span>🧩</span> ชิ้นส่วนที่ประกอบอยู่ในเครื่องปัจจุบัน ({{ active_components|length }} รายการ)
+                                </h3>
+                                <p style="margin: 2px 0 0; font-size: 13px; color: var(--text-secondary);">
+                                    อุปกรณ์ฮาร์ดแวร์ที่ติดตั้งอยู่ในเครื่องขณะนี้
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if active_components %}
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b;">
+                                    <th style="padding: 10px 8px;">ประเภท</th>
+                                    <th style="padding: 10px 8px;">ชื่อชิ้นส่วน / สเปก</th>
+                                    <th style="padding: 10px 8px;">Serial Number</th>
+                                    <th style="padding: 10px 8px;">วันที่ประกอบ</th>
+                                    <th style="padding: 10px 8px; text-align: center;">ดำเนินการ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comp in active_components %}
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 12px 8px;">
+                                        <span class="priority-badge" style="background: #e0f2fe; color: #0284c7; font-weight: 600;">
+                                            {{ comp.component_type }}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 12px 8px;">
+                                        <strong>{{ comp.item_name }}</strong>
+                                        {% if comp.brand %}<span style="color: #64748b; font-size: 13px;">({{ comp.brand }})</span>{% endif %}
+                                        {% if comp.detail_spac %}
+                                            <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                                                {{ comp.detail_spac }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 12px 8px; font-family: monospace; font-size: 13px; color: #475569;">
+                                        {{ comp.serialnumber or '-' }}
+                                    </td>
+                                    <td style="padding: 12px 8px; color: #64748b; font-size: 13px;">
+                                        {{ comp.assembly_date.strftime('%d/%m/%Y') if comp.assembly_date else '-' }}
+                                    </td>
+                                    <td style="padding: 12px 8px; text-align: center;">
+                                        <button 
+                                            type="button" 
+                                            class="btn-sm btn-danger-outline"
+                                            onclick="openDetachModal('{{ comp.assembly_id }}', '{{ comp.item_name }}', '{{ comp.serialnumber or '' }}')"
+                                        >
+                                            ถอดออก
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                        <div style="text-align: center; padding: 36px; background: #f8fafc; border-radius: 8px; color: #94a3b8;">
+                            ยังไม่มีชิ้นส่วนประกอบอยู่ในเครื่องนี้
+                            <br><small>สามารถเลือกประกอบชิ้นส่วนจากคลังด้านขวาได้ทันที</small>
+                        </div>
+                    {% endif %}
+                </section>
+
+                <!-- ฟอร์มประกอบชิ้นส่วนเข้าเครื่อง -->
+                <section class="form-section" style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                    <div class="section-heading" style="margin-bottom: 18px;">
+                        <div>
+                            <h3 style="margin: 0; font-size: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <span>＋</span> ประกอบชิ้นส่วนเข้าเครื่อง
+                            </h3>
+                            <p style="margin: 2px 0 0; font-size: 13px; color: var(--text-secondary);">
+                                นำชิ้นส่วนจากคลังมาประกอบเข้าเครื่องนี้
+                            </p>
+                        </div>
+                    </div>
+
+                    <form action="/assets/assembly/attach" method="post">
+                        <input type="hidden" name="pc_id" value="{{ selected_pc.id }}">
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label for="component_id" style="font-weight: 600; font-size: 13px; margin-bottom: 6px; display: block;">
+                                เลือกชิ้นส่วนที่พร้อมใช้งานในคลัง (In-Stock) <span class="required">*</span>
+                            </label>
+                            {% if available_components %}
+                                <select id="component_id" name="component_id" required style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; background: white;">
+                                    <option value="">-- เลือกชิ้นส่วนที่ต้องการประกอบ --</option>
+                                    {% for c in available_components %}
+                                        <option value="{{ c.id }}">
+                                            [{{ c.type }}] {{ c.item_name }} {% if c.serialnumber %}(S/N: {{ c.serialnumber }}){% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <div style="padding: 12px; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; font-size: 13px; color: #92400e; margin-bottom: 10px;">
+                                    ไม่มีชิ้นส่วนว่างในคลังขณะนี้
+                                </div>
+                                <a href="/assets/new?tab=component" class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 13px;">
+                                    ＋ ลงทะเบียนชิ้นส่วนใหม่
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="assembly_date" style="font-weight: 600; font-size: 13px; margin-bottom: 6px; display: block;">
+                                วันที่ประกอบเข้าเครื่อง
+                            </label>
+                            <input 
+                                type="date" 
+                                id="assembly_date" 
+                                name="assembly_date" 
+                                value="{{ today_str }}"
+                                required
+                                style="width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);"
+                            >
+                        </div>
+
+                        {% if available_components %}
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                                ประกอบชิ้นส่วนเข้าเครื่อง <span>→</span>
+                            </button>
+                        {% endif %}
+                    </form>
+                </section>
+
+            </div>
+
+            <!-- ประวัติการถอด-ประกอบชิ้นส่วน (Disassembly History) -->
+            <section class="form-section" style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="margin: 0; font-size: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                        <span>📋</span> ประวัติชิ้นส่วนที่เคยถอดออกจากเครื่องนี้ ({{ history_components|length }} รายการ)
+                    </h3>
+                </div>
+
+                {% if history_components %}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b;">
+                                <th style="padding: 10px 8px;">ประเภท</th>
+                                <th style="padding: 10px 8px;">ชื่อชิ้นส่วน</th>
+                                <th style="padding: 10px 8px;">Serial Number</th>
+                                <th style="padding: 10px 8px;">วันที่ประกอบเข้า</th>
+                                <th style="padding: 10px 8px;">วันที่ถอดออก</th>
+                                <th style="padding: 10px 8px;">สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hist in history_components %}
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 12px 8px;">
+                                    <span class="priority-badge" style="background: #f1f5f9; color: #475569;">
+                                        {{ hist.component_type }}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 8px;">
+                                    <strong>{{ hist.item_name }}</strong>
+                                    {% if hist.brand %}<span style="color: #64748b; font-size: 13px;">({{ hist.brand }})</span>{% endif %}
+                                </td>
+                                <td style="padding: 12px 8px; font-family: monospace; font-size: 13px; color: #64748b;">
+                                    {{ hist.serialnumber or '-' }}
+                                </td>
+                                <td style="padding: 12px 8px; color: #64748b;">
+                                    {{ hist.assembly_date.strftime('%d/%m/%Y') if hist.assembly_date else '-' }}
+                                </td>
+                                <td style="padding: 12px 8px; color: #dc2626; font-weight: 500;">
+                                    {{ hist.remove_date.strftime('%d/%m/%Y') if hist.remove_date else '-' }}
+                                </td>
+                                <td style="padding: 12px 8px;">
+                                    <span class="status-badge-expired">ถอดออกแล้ว</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                    <div style="text-align: center; padding: 30px; color: #94a3b8; font-size: 13px;">
+                        ยังไม่มีประวัติการถอดชิ้นส่วนออกจากเครื่องนี้
+                    </div>
+                {% endif %}
+            </section>
+
+            {% endif %}
+
+            <footer class="page-footer" style="margin-top: 40px;">
+                IT Support Team · Internal Asset Management
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Modal ยืนยันการถอดชิ้นส่วน -->
+    <div id="detachModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; width: 100%; max-width: 440px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);">
+            <h3 style="margin-top: 0; margin-bottom: 8px; color: #1e293b; font-size: 18px;">
+                ยืนยันการถอดชิ้นส่วน
+            </h3>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 16px;">
+                คุณต้องการถอด <strong id="modalCompName" style="color: #1e293b;"></strong> ออกจากเครื่องนี้ใช่หรือไม่?
+                ชิ้นส่วนนี้จะกลับเข้าสู่สถานะพร้อมใช้งานในคลัง
+            </p>
+
+            <form action="/assets/assembly/detach" method="post">
+                <input type="hidden" id="modalAssemblyId" name="assembly_id" value="">
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="remove_date" style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 6px;">
+                        ระบุวันที่ถอดออก:
+                    </label>
+                    <input 
+                        type="date" 
+                        id="remove_date" 
+                        name="remove_date" 
+                        value="{{ today_str }}"
+                        required
+                        style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);"
+                    >
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn btn-outline" onclick="closeDetachModal()">
+                        ยกเลิก
+                    </button>
+                    <button type="submit" class="btn btn-primary" style="background: #dc2626; border-color: #dc2626;">
+                        ยืนยันการถอดออก
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openDetachModal(assemblyId, compName, serial) {
+            document.getElementById('modalAssemblyId').value = assemblyId;
+            document.getElementById('modalCompName').textContent = compName + (serial ? ' (S/N: ' + serial + ')' : '');
+            const modal = document.getElementById('detachModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeDetachModal() {
+            const modal = document.getElementById('detachModal');
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('detachModal');
+            if (event.target === modal) {
+                closeDetachModal();
+            }
+        };
+    </script>
+    <script src="/static/notifications.js" defer></script>
+</body>
+</html>

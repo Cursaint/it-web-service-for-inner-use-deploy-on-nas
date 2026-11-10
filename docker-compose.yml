@@ -1,0 +1,18 @@
+services:
+  it-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: it-service-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - TZ=Asia/Bangkok
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@localhost:5432/it_service}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

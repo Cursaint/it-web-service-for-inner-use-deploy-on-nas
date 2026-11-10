@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกข้อมูลซอฟต์แวร์คอมพิวเตอร์ | IT Service</title>
+    <!-- อ้างอิงไฟล์ style.css ตามโครงสร้างเดิม -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Sidebar (ยกมาจาก assets.html) -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">IT</div>
+                <div>
+                    <h2>IT SERVICE</h2>
+                    <span>Support Service</span>
+                </div>
+            </div>
+
+            <nav class="navigation">
+                <p class="nav-label">เมนูหลัก</p>
+                <a href="/" class="nav-item">
+                    <span class="nav-icon">⌂</span>
+                    หน้าหลัก
+                </a>
+                <a href="/it-request" class="nav-item">
+                    <span class="nav-icon">＋</span>
+                    แจ้งปัญหา IT
+                </a>
+                <a href="/my-tickets" class="nav-item">
+                    <span class="nav-icon">▤</span>
+                    รายการคำร้อง
+                </a>
+                <a href="/assets" class="nav-item active">
+                    <span class="nav-icon">▣</span>
+                    ทะเบียนอุปกรณ์
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="avatar">IT</div>
+                <div class="user-info">
+                    <strong>ผู้ดูแลระบบ</strong>
+                    <span>Asset Manager</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <a href="/">หน้าหลัก</a> <span>/</span> <a href="/assets">ทะเบียนทรัพย์สิน IT</a> <span>/</span> <span>บันทึกข้อมูลซอฟต์แวร์</span>
+                </div>
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    Asset Management
+                </div>
+            </header>
+
+            <!-- Page Heading -->
+            <section class="page-heading">
+                <div>
+                    <h1>บันทึกข้อมูลซอฟต์แวร์คอมพิวเตอร์</h1>
+                    <p>ระบบบันทึกข้อมูลด้าน Software, Remote Access และตั้งค่าระบบเครือข่ายของเครื่องคอมพิวเตอร์</p>
+                </div>
+            </section>
+
+            {% if success_message %}
+                <div class="success-message">
+                    {{ success_message }}
+                </div>
+            {% endif %}
+
+            {% if error %}
+                <div class="error-message" style="background-color: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-weight: 500;">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <!-- Form Container -->
+            <form action="/software/{{ asset.id }}" method="POST">
+                
+                <!-- Section 1: ข้อมูลพื้นฐานของเครื่อง -->
+                <div class="form-section">
+                    <div class="section-heading">
+                        <div class="section-number">1</div>
+                        <div>
+                            <h2>ข้อมูลพื้นฐานของเครื่อง</h2>
+                            <p>ระบุชื่อเครื่อง ข้อมูลเครือข่าย และระบบปฏิบัติการ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="machine_name">
+                                ชื่อเครื่อง (Machine Name)
+                            </label>
+                            <input  id="machine_name" 
+                                    name="machine_name"
+                                    value="{{ asset.machine_name if asset.machine_name else '' }}" 
+                                    placeholder="เช่น IT-PC-001">
+                        </div>
+                        <div class="form-group">
+                            <label for="service_tag">
+                                หมายเลขเครื่อง
+                            </label>
+                            <input  id="service_tag" 
+                                    name="service_tag" 
+                                    value="{{ asset.service_tag }}" 
+                                    readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="os">
+                                ระบบปฏิบัติการ (OS) <span class="required">*</span>
+                            </label>
+                            <select id="os" 
+                                    name="os" 
+                                    required>
+                                <option value="">-- เลือกระบบปฏิบัติการ --</option>
+                                <option value="win11" {% if softwares and softwares.os == 'win11' %}selected{% endif %}>Windows 11</option>
+                                <option value="win10" {% if softwares and softwares.os == 'win10' %}selected{% endif %}>Windows 10</option>
+                                <option value="mac" {% if softwares and softwares.os == 'mac' %}selected{% endif %}>macOS</option>
+                                <option value="linux" {% if softwares and softwares.os == 'linux' %}selected{% endif %}>Linux / Ubuntu</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mac_address">
+                                MAC Address <span class="required">*</span>
+                            </label>
+                            <input  id="mac_address" 
+                                    name="mac_address" 
+                                    value="{{ softwares.mac_address if softwares and softwares.mac_address else '' }}" 
+                                    placeholder="เช่น 00:1A:2B:3C:4D:5E" 
+                                    required>
+                            <div class="field-hint">
+                                ใช้สำหรับการทำ Static IP หรือตรวจสอบในระบบ Network
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ipaddress">
+                                IP Address <span class="optional">(ถ้ามี)</span>
+                            </label>
+                            <input  id="ipaddress" 
+                                    name="ipaddress" 
+                                    value="{{ softwares.ipaddress if softwares and softwares.ipaddress else '' }}"  
+                                    placeholder="เช่น 192.168.1.xxx">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Section 2: ข้อมูล Remote Access -->
+                <div class="form-section">
+                    <div class="section-heading">
+                        <div class="section-number">2</div>
+                        <div>
+                            <h2>ข้อมูลการเชื่อมต่อระยะไกล (Remote Access)</h2>
+                            <p>โปรแกรมและรหัสผ่านสำหรับให้ทีม IT Support เข้าควบคุมเครื่อง</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="rc_program">
+                                โปรแกรม Remote <span class="required">*</span>
+                            </label>
+                            <select id="rc_program" 
+                                    name="rc_program" 
+                                    required>
+                                <option value="">-- เลือกโปรแกรม --</option>
+                                <option value="anydesk" {% if softwares and softwares.rc_program == 'anydesk' %}selected{% endif %}>AnyDesk</option>
+                                <option value="ultraviewer" {% if softwares and softwares.rc_program == 'ultraviewer' %}selected{% endif %}>Ultraviewer</option>
+                                <option value="rustdesk" {% if softwares and softwares.rc_program == 'rustdesk' %}selected{% endif %}>RustDesk</option>
+                                <option value="other" {% if softwares and softwares.rc_program == 'other' %}selected{% endif %}>อื่นๆ (ระบุในหมายเหตุ)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rc_id">
+                                รหัส Remote (Remote ID) <span class="required">*</span>
+                            </label>
+                            <input  type="text" 
+                                    id="rc_id" 
+                                    name="rc_id" 
+                                    value="{{ softwares.rc_id if softwares and softwares.rc_id else '' }}" 
+                                    placeholder="เช่น 123 456 789" 
+                                    required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rc_password">
+                                Password Remote <span class="required">*</span>
+                            </label>
+                            <input  type="text" 
+                                    id="rc_password" 
+                                    name="rc_password" 
+                                    value="{{ softwares.rc_password if softwares and softwares.rc_password else '' }}" 
+                                    placeholder="ระบุรหัสผ่านสำหรับการเข้าถึง" 
+                                    required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Section 3: ข้อมูลบัญชีผู้ใช้และอีเมล -->
+                <div class="form-section">
+                    <div class="section-heading">
+                        <div class="section-number">3</div>
+                        <div>
+                            <h2>ข้อมูลบัญชีผู้ใช้และอีเมล</h2>
+                            <p>ไม่บังคับ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="email">
+                                Office Mail
+                            </label>
+                            <input  type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    value="{{ softwares.email if softwares and softwares.email else '' }}" 
+                                    placeholder="เช่น user@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="email_password">
+                                รหัสผ่านอีเมล <span class="optional">(บันทึกชั่วคราว / ถ้าจำเป็น)</span>
+                            </label>
+                            <input  type="text" 
+                                    id="email_password" 
+                                    name="email_password" 
+                                    value="{{ softwares.email_password if softwares and softwares.email_password else '' }}" 
+                                    placeholder="รหัสผ่านอีเมลเริ่มต้น">
+                        </div>  
+                        <div class="form-group full-width">
+                            <label for="other_software">
+                                หมายเหตุ / ซอฟต์แวร์เฉพาะทางเพิ่มเติม <span class="optional">(Optional)</span>
+                            </label>
+                            <input  type="text" 
+                                    id="other_software" 
+                                    name="other_software" 
+                                    value="{{ softwares.other_software if softwares and softwares.other_software else '' }}" 
+                                    placeholder="ระบุโปรแกรมอื่นๆ ที่ติดตั้งในเครื่องนี้ เช่น ERP, AutoCAD, โปรแกรมบัญชี...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Footer -->
+                <div class="form-footer">
+                    <p class="privacy-note">⚠️ ข้อมูลรหัสผ่านต่างๆ จะถูกจัดเก็บอย่างปลอดภัยและเข้าถึงได้เฉพาะทีม IT Support เท่านั้น</p>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+                            ยกเลิก
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <span>💾</span> บันทึกข้อมูล
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+
+            <footer class="page-footer">
+                IT Support Team · Internal Asset Management
+            </footer>
+
+        </main>
+    </div>
+
+</body>
+</html>

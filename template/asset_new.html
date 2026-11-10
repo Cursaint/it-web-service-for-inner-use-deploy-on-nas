@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกอุปกรณ์ใหม่ | IT Service</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .tab-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 2px;
+        }
+        .tab-link {
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -4px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-link.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">IT</div>
+                <div>
+                    <h2>IT SERVICE</h2>
+                    <span>Support Service</span>
+                </div>
+            </div>
+
+            <nav class="navigation">
+                <p class="nav-label">เมนูหลัก</p>
+
+                <a href="/" class="nav-item">
+                    <span class="nav-icon">⌂</span>
+                    หน้าหลัก
+                </a>
+
+                <a href="/it-request" class="nav-item">
+                    <span class="nav-icon">＋</span>
+                    แจ้งปัญหา IT
+                </a>
+
+                <a href="/my-tickets" class="nav-item">
+                    <span class="nav-icon">▤</span>
+                    รายการคำร้อง
+                </a>
+
+                <a href="/assets" class="nav-item active">
+                    <span class="nav-icon">▣</span>
+                    ทะเบียนอุปกรณ์
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="avatar">IT</div>
+                <div class="user-info">
+                    <strong>ผู้ดูแลระบบ</strong>
+                    <span>Asset Manager</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <a href="/">หน้าหลัก</a> <span>/</span> <a href="/assets">ทะเบียนทรัพย์สิน</a> <span>/</span> บันทึกอุปกรณ์ใหม่
+                </div>
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    Asset Registration
+                </div>
+            </header>
+
+            <section class="page-heading" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1>บันทึกข้อมูลอุปกรณ์ใหม่ (New Asset Registration)</h1>
+                    <p>ลงทะเบียนอุปกรณ์ไอทีหลัก หรือเพิ่มชิ้นส่วนคอมพิวเตอร์เข้าสู่ระบบ</p>
+                </div>
+                <div>
+                    <a href="/assets" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span>←</span> กลับหน้ารายการอุปกรณ์
+                    </a>
+                </div>
+            </section>
+
+            {% if success_message %}
+                <div class="success-message">
+                    {{ success_message }}
+                </div>
+            {% endif %}
+
+            {% if error_message %}
+                <div style="background-color: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 14px 18px; border-radius: 10px; margin-bottom: 20px;">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button type="button" class="tab-link {% if active_tab != 'component' %}active{% endif %}" onclick="switchTab('asset')">
+                    <span>🖥️</span> บันทึกอุปกรณ์หลัก (PC / Printer / Device)
+                </button>
+                <button type="button" class="tab-link {% if active_tab == 'component' %}active{% endif %}" onclick="switchTab('component')">
+                    <span>🧩</span> บันทึกชิ้นส่วนคอมพิวเตอร์ (PC Component)
+                </button>
+            </div>
+
+            <!-- Tab 1: บันทึกอุปกรณ์หลัก -->
+            <div id="tab-asset" class="tab-pane {% if active_tab != 'component' %}active{% endif %}">
+                <form action="/assets/new" method="post" class="request-form">
+                    
+                    <section class="form-section">
+                        <div class="section-heading">
+                            <div class="section-number">01</div>
+                            <div>
+                                <h2>ข้อมูลประจำอุปกรณ์</h2>
+                                <p>ระบุรหัสทรัพย์สิน ประเภท ยี่ห้อ และรุ่นของอุปกรณ์</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="service_tag">
+                                    Service Tag / Asset Tag <span class="required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="service_tag"
+                                    name="service_tag"
+                                    placeholder="เช่น COMSET-IT01, PRINTR-ACC06"
+                                    required
+                                >
+                                <small class="field-hint">
+                                    รหัสเฉพาะสำหรับใช้อ้างอิงอุปกรณ์
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="type">
+                                    ประเภทอุปกรณ์ <span class="required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="type"
+                                    name="type"
+                                    list="type-suggestions"
+                                    placeholder="เลือกหรือพิมพ์ประเภท เช่น ชุดคอมพิวเตอร์, เครื่องพิมพ์"
+                                    required
+                                >
+                                <datalist id="type-suggestions">
+                                    <option value="ชุดคอมพิวเตอร์"></option>
+                                    <option value="เครื่องพิมพ์"></option>
+                                    <option value="เครื่องพิมพ์บาร์โค้ด"></option>
+                                    <option value="วิทยุสื่อสาร"></option>
+                                    <option value="อุปกรณ์คอมพิวเตอร์"></option>
+                                    <option value="โทรศัพท์มือถือ"></option>
+                                    <option value="กล้องวงจรปิด"></option>
+                                    <option value="เครื่องสแกนบาร์โค้ด"></option>
+                                </datalist>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="brand">ยี่ห้อ (Brand)</label>
+                                <input
+                                    type="text"
+                                    id="brand"
+                                    name="brand"
+                                    placeholder="เช่น ASUS, EPSON, HP, Dell, Gigabyte"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="model">รุ่น (Model)</label>
+                                <input
+                                    type="text"
+                                    id="model"
+                                    name="model"
+                                    placeholder="เช่น L3210, Pro B760M-P, OptiPlex 7090"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="machine_name">ชื่อเครื่อง (Machine Name / Hostname)</label>
+                                <input
+                                    type="text"
+                                    id="machine_name"
+                                    name="machine_name"
+                                    placeholder="เช่น IT-PC-01, ACC-DESK-04 (ถ้ามี)"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="price">ราคาจัดซื้อ (บาท)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    id="price"
+                                    name="price"
+                                    placeholder="0.00"
+                                    value="0"
+                                >
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="section-divider"></div>
+
+                    <section class="form-section">
+                        <div class="section-heading">
+                            <div class="section-number">02</div>
+                            <div>
+                                <h2>ข้อมูลการจัดซื้อและการรับประกัน</h2>
+                                <p>บันทึกวันที่ซื้อ ผู้ขาย และระยะเวลาประกัน</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="buy_date">วันที่ซื้อ</label>
+                                <input
+                                    type="date"
+                                    id="buy_date"
+                                    name="buy_date"
+                                    value="{{ today_str }}"
+                                    onchange="calculateWarrantyExp('buy_date', 'warranty_year', 'warranty_exp')"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="supplier">ผู้จัดจำหน่าย / ร้านค้า (Supplier)</label>
+                                <input
+                                    type="text"
+                                    id="supplier"
+                                    name="supplier"
+                                    placeholder="เช่น JIB, Advice, Banana IT, Synnex"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="warranty_year">ระยะเวลารับประกัน (ปี)</label>
+                                <input
+                                    type="number"
+                                    step="1"
+                                    id="warranty_year"
+                                    name="warranty_year"
+                                    placeholder="เช่น 1, 2, 3"
+                                    onchange="calculateWarrantyExp('buy_date', 'warranty_year', 'warranty_exp')"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="warranty_exp">วันหมดประกัน</label>
+                                <input
+                                    type="date"
+                                    id="warranty_exp"
+                                    name="warranty_exp"
+                                >
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="remark">หมายเหตุ / ข้อมูลเพิ่มเติม</label>
+                                <textarea
+                                    id="remark"
+                                    name="remark"
+                                    rows="3"
+                                    placeholder="รายละเอียดเพิ่มเติม สถานที่ตั้ง หรือผู้ดูแลประจำ"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer class="form-footer">
+                        <p class="privacy-note">
+                            ระบบจะบันทึกอุปกรณ์ลงในฐานข้อมูล it_asset และสามารถนำไปจัดการชิ้นส่วนต่อได้ทันที
+                        </p>
+
+                        <div class="form-actions">
+                            <button type="reset" class="btn btn-secondary">
+                                ล้างข้อมูล
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                บันทึกอุปกรณ์ <span>→</span>
+                            </button>
+                        </div>
+                    </footer>
+                </form>
+            </div>
+
+            <!-- Tab 2: บันทึกชิ้นส่วนคอมพิวเตอร์ -->
+            <div id="tab-component" class="tab-pane {% if active_tab == 'component' %}active{% endif %}">
+                <form action="/assets/component/new" method="post" class="request-form">
+                    
+                    <section class="form-section">
+                        <div class="section-heading">
+                            <div class="section-number">01</div>
+                            <div>
+                                <h2>ข้อมูลชิ้นส่วน (Component Details)</h2>
+                                <p>ระบุชื่อชิ้นส่วน ชนิด ซีเรียลนัมเบอร์ และสเปก</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="comp_item_name">
+                                    ชื่อชิ้นส่วน (Item Name) <span class="required">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="comp_item_name"
+                                    name="item_name"
+                                    placeholder="เช่น Intel Core i5-12400F, Kingston Fury 16GB"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comp_type">
+                                    ประเภทชิ้นส่วน <span class="required">*</span>
+                                </label>
+                                <select id="comp_type" name="type" required>
+                                    <option value="">-- เลือกประเภทชิ้นส่วน --</option>
+                                    <option value="CPU">CPU (หน่วยประมวลผล)</option>
+                                    <option value="Mainboard">Mainboard (เมนบอร์ด)</option>
+                                    <option value="RAM">RAM (หน่วยความจำ)</option>
+                                    <option value="Storage">Storage (SSD / M.2 / HDD)</option>
+                                    <option value="VGA">VGA / GPU (การ์ดจอ)</option>
+                                    <option value="Power Supply">Power Supply (พาวเวอร์ซัพพลาย)</option>
+                                    <option value="Case">Case (เคส)</option>
+                                    <option value="Monitor">Monitor (จอภาพ)</option>
+                                    <option value="Other">Other (อุปกรณ์อื่นๆ)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comp_brand">ยี่ห้อ (Brand)</label>
+                                <input
+                                    type="text"
+                                    id="comp_brand"
+                                    name="brand"
+                                    placeholder="เช่น Intel, AMD, Kingston, ASUS, Corsair"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comp_serialnumber">Serial Number (S/N)</label>
+                                <input
+                                    type="text"
+                                    id="comp_serialnumber"
+                                    name="serialnumber"
+                                    placeholder="หมายเลขซีเรียลของชิ้นส่วน"
+                                >
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="comp_detail_spac">สเปกรายละเอียด (Specification)</label>
+                                <input
+                                    type="text"
+                                    id="comp_detail_spac"
+                                    name="detail_spac"
+                                    placeholder="เช่น 6 Cores / 12 Threads 2.50GHz, DDR4 3200MHz, Read 3500MB/s"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comp_price">ราคาจัดซื้อ (บาท)</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    id="comp_price"
+                                    name="price"
+                                    placeholder="0.00"
+                                    value="0"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comp_buy_date">วันที่ซื้อ</label>
+                                <input
+                                    type="date"
+                                    id="comp_buy_date"
+                                    name="buy_date"
+                                    value="{{ today_str }}"
+                                    onchange="calculateWarrantyExp('comp_buy_date', 'comp_warranty_year', 'comp_warranty_exp')"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comp_supplier">ร้านค้า / ผู้จัดจำหน่าย</label>
+                                <input
+                                    type="text"
+                                    id="comp_supplier"
+                                    name="supplier"
+                                    placeholder="เช่น JIB, Advice"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comp_warranty_year">ระยะเวลารับประกัน (ปี)</label>
+                                <input
+                                    type="number"
+                                    step="1"
+                                    id="comp_warranty_year"
+                                    name="warranty_year"
+                                    placeholder="เช่น 1, 3, 5"
+                                    onchange="calculateWarrantyExp('comp_buy_date', 'comp_warranty_year', 'comp_warranty_exp')"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comp_warranty_exp">วันหมดประกัน</label>
+                                <input
+                                    type="date"
+                                    id="comp_warranty_exp"
+                                    name="warranty_exp"
+                                >
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="section-divider"></div>
+
+                    <!-- ออปชันประกอบเข้าเครื่องทันที -->
+                    <section class="form-section">
+                        <div class="section-heading">
+                            <div class="section-number">02</div>
+                            <div>
+                                <h2>การประกอบเข้าเครื่อง (Option)</h2>
+                                <p>สามารถเลือกประกอบเข้าเครื่องคอมพิวเตอร์ได้ทันที หรือปล่อยว่างไว้เพื่อเก็บในคลังอะไหล่</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="attach_to_pc_id">เลือกเครื่องคอมพิวเตอร์ที่ต้องการประกอบเข้าทันที (ถ้ามี)</label>
+                                <select id="attach_to_pc_id" name="attach_to_pc_id">
+                                    <option value="">-- ยังไม่ประกอบเข้าเครื่อง (เก็บไว้ในคลังอะไหล่สำรอง) --</option>
+                                    {% for pc in pcs %}
+                                        <option value="{{ pc.id }}">
+                                            {{ pc.service_tag }} ({{ pc.brand or '' }} {{ pc.model or '' }}) {% if pc.machine_name %}- {{ pc.machine_name }}{% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="field-hint">
+                                    หากเลือกเครื่อง ระบบจะทำการบันทึกการประกอบเข้าตาราง asset_assembly ให้โดยอัตโนมัติ
+                                </small>
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer class="form-footer">
+                        <p class="privacy-note">
+                            ข้อมูลจะถูกจัดเก็บลงตาราง pc_component อย่างปลอดภัย
+                        </p>
+
+                        <div class="form-actions">
+                            <button type="reset" class="btn btn-secondary">
+                                ล้างข้อมูล
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                บันทึกชิ้นส่วน <span>→</span>
+                            </button>
+                        </div>
+                    </footer>
+                </form>
+            </div>
+
+            <footer class="page-footer" style="margin-top: 40px;">
+                IT Support Team · Internal Asset Management
+            </footer>
+
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            if (tab === 'asset') {
+                document.querySelectorAll('.tab-link')[0].classList.add('active');
+                document.getElementById('tab-asset').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-link')[1].classList.add('active');
+                document.getElementById('tab-component').classList.add('active');
+            }
+        }
+
+        function calculateWarrantyExp(buyDateId, yearId, expDateId) {
+            const buyInput = document.getElementById(buyDateId);
+            const yearInput = document.getElementById(yearId);
+            const expInput = document.getElementById(expDateId);
+
+            if (buyInput && yearInput && expInput && buyInput.value && yearInput.value) {
+                const buy = new Date(buyInput.value);
+                const years = parseInt(yearInput.value, 10);
+                if (!isNaN(years) && years > 0) {
+                    buy.setFullYear(buy.getFullYear() + years);
+                    expInput.value = buy.toISOString().split('T')[0];
+                }
+            }
+        }
+    </script>
+    <script src="/static/notifications.js" defer></script>
+</body>
+</html>

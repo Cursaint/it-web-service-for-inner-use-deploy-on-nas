@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IT Service Center</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #172033;
+        }
+
+        header {
+            background: #142b4a;
+            color: white;
+            padding: 32px 24px;
+        }
+
+        header .container,
+        main {
+            max-width: 1080px;
+            margin: auto;
+        }
+
+        header h1 {
+            margin: 8px 0;
+            font-size: 32px;
+        }
+
+        header p {
+            color: #d4dfed;
+            margin-bottom: 0;
+        }
+
+        main {
+            padding: 28px 20px;
+        }
+
+        .notice {
+            background: #e6f4ee;
+            border: 1px solid #b8e2ce;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #e1e7f0;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 5px 18px #1720330a;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .icon {
+            font-size: 32px;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: #5e6b80;
+            line-height: 1.6;
+            min-height: 76px;
+            flex-grow: 1;
+        }
+
+        button, .btn {
+            background: #2459a9;
+            color: #ffffff !important;
+            border: none;
+            border-radius: 8px;
+            padding: 11px 18px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none !important;
+            display: inline-block;
+            text-align: center;
+            width: fit-content;
+            transition: background 0.2s;
+        }
+
+        button:hover, .btn:hover {
+            background: #1b4482;
+            color: #ffffff !important;
+        }
+
+        /* ป้องกันปัญหาสีลิงก์เปลี่ยนเป็นสีม่วงหลังถูกคลิก (:visited) ให้เป็นสีขาวตลอด */
+        button a,
+        button a:link,
+        button a:visited,
+        button a:hover,
+        button a:active,
+        .btn,
+        .btn:link,
+        .btn:visited,
+        .btn:hover,
+        .btn:active {
+            color: #ffffff !important;
+            text-decoration: none !important;
+        }
+
+        button:disabled, .btn-disabled {
+            background: #a5b4c8 !important;
+            color: #ffffff !important;
+            cursor: not-allowed;
+        }
+
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: #718096;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <small>INTERNAL IT SYSTEM</small>
+            <h1>IT Service Center</h1>
+            <p>ศูนย์กลางแจ้งปัญหา IT และจัดการทรัพย์สิน</p>
+        </div>
+    </header>
+
+    <main>
+        <div class="notice">
+            <strong>ประสปปัญหา IT-ต้องการความช่วยเหลือจาก IT</strong>
+            <br>
+            กดปุ่ม "แจ้งปัญหา" เพื่อส่งคำร้องให้ทีม IT ของเรา
+        </div>
+
+        <section class="grid">
+            <article class="card">
+                <div class="icon">🛠️</div>
+                <h2>แจ้งปัญหา IT</h2>
+                <p>
+                    แจ้งปัญหาอินเทอร์เน็ต โปรแกรม
+                    คอมพิวเตอร์ หรืออุปกรณ์สำนักงาน
+                </p>
+                <a href="/it-request" class="btn">แจ้งปัญหา</a>
+            </article>
+
+            <article class="card">
+                <div class="icon">📋</div>
+                <h2>ติดตามงาน</h2>
+                <p>
+                    ตรวจสอบสถานะคำร้อง
+                    ผู้รับผิดชอบ และประวัติการแก้ไข
+                </p>
+                <a href="/my-tickets" class="btn">ดูคำร้อง</a>
+            </article>
+
+            <article class="card">
+                <div class="icon">🖥️</div>
+                <h2>ทะเบียนทรัพย์สิน IT</h2>
+                <p>
+                    จัดเก็บข้อมูลคอมพิวเตอร์
+                    อุปกรณ์เครือข่าย และผู้ใช้งาน
+                </p>
+                <a href="/assets" class="btn">จัดการทรัพย์สิน</a>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        IT Service Center | Internal Use
+    </footer>
+    <script src="/static/notifications.js" defer></script>
+</body>
+</html>

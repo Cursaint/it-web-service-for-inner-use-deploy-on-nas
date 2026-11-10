@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ทะเบียนทรัพย์สิน IT | IT Service</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">IT</div>
+                <div>
+                    <h2>IT SERVICE</h2>
+                    <span>Support Service</span>
+                </div>
+            </div>
+
+            <nav class="navigation">
+                <p class="nav-label">เมนูหลัก</p>
+
+                <a href="/" class="nav-item">
+                    <span class="nav-icon">⌂</span>
+                    หน้าหลัก
+                </a>
+
+                <a href="/it-request" class="nav-item">
+                    <span class="nav-icon">＋</span>
+                    แจ้งปัญหา IT
+                </a>
+
+                <a href="/my-tickets" class="nav-item">
+                    <span class="nav-icon">▤</span>
+                    รายการคำร้อง
+                </a>
+
+                <a href="/assets" class="nav-item active">
+                    <span class="nav-icon">▣</span>
+                    ทะเบียนอุปกรณ์
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="avatar">IT</div>
+                <div class="user-info">
+                    <strong>ผู้ดูแลระบบ</strong>
+                    <span>Asset Manager</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="topbar">
+                <div class="breadcrumb">
+                    <a href="/">หน้าหลัก</a> <span>/</span> <a href="/assets">ทะเบียนทรัพย์สิน IT</a>
+                </div>
+                <div class="system-status">
+                    <span class="status-dot"></span>
+                    Asset Management
+                </div>
+            </header>
+
+            <section class="page-heading" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h1>ทะเบียนทรัพย์สิน IT (Asset Management)</h1>
+                    <p>ระบบตรวจสอบและจัดการอุปกรณ์คอมพิวเตอร์ เครื่องพิมพ์ และอุปกรณ์ไอทีทั้งหมด</p>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="/assets/assembly" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span>⚙️</span> ถอด-ประกอบชิ้นส่วน
+                    </a>
+                    <a href="/assets/new" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span>＋</span> บันทึกอุปกรณ์ใหม่
+                    </a>
+                </div>
+            </section>
+
+            {% if success_message %}
+                <div class="success-message">
+                    {{ success_message }}
+                </div>
+            {% endif %}
+
+            <!-- สถิติภาพรวม (KPI Stat Cards) -->
+            <section class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">🖥️</div>
+                    <div>
+                        <div class="stat-number">{{ stats.pc_count }}</div>
+                        <div class="stat-label">ชุดคอมพิวเตอร์ (PC)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green">🖨️</div>
+                    <div>
+                        <div class="stat-number">{{ stats.printer_count }}</div>
+                        <div class="stat-label">เครื่องพิมพ์ (Printers)</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon purple">📻</div>
+                    <div>
+                        <div class="stat-number">{{ stats.other_count }}</div>
+                        <div class="stat-label">อุปกรณ์อื่นๆ</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon amber">📦</div>
+                    <div>
+                        <div class="stat-number">{{ stats.total_count }}</div>
+                        <div class="stat-label">ทรัพย์สินรวมทั้งหมด</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- แถบค้นหาและตัวกรอง -->
+            <form action="/assets" method="get" class="filter-bar">
+                <div class="filter-inputs">
+                    <input 
+                        type="text" 
+                        name="q" 
+                        class="filter-search" 
+                        placeholder="ค้นหา Service Tag, ยี่ห้อ, รุ่น, หรือชื่อเครื่อง..." 
+                        value="{{ q or '' }}"
+                    >
+
+                    <select name="type" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: white;">
+                        <option value="">-- ทุกประเภทอุปกรณ์ --</option>
+                        {% for t in types %}
+                            <option value="{{ t }}" {% if selected_type == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select name="brand" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: white;">
+                        <option value="">-- ทุกยี่ห้อ (Brand) --</option>
+                        {% for b in brands %}
+                            <option value="{{ b }}" {% if selected_brand == b %}selected{% endif %}>{{ b }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <button type="submit" class="btn btn-primary" style="padding: 9px 18px;">
+                        ค้นหา
+                    </button>
+                    {% if q or selected_type or selected_brand %}
+                        <a href="/assets" class="btn btn-outline" style="padding: 9px 14px;">
+                            ล้างตัวกรอง
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <!-- ตารางแสดงรายการทรัพย์สิน -->
+            <section class="form-section" style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">
+                        รายการอุปกรณ์ทั้งหมด (พบ {{ total_count }} รายการ)
+                    </h3>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b;">
+                                <th style="padding: 12px;">Service Tag</th>
+                                <th style="padding: 12px;">ประเภทอุปกรณ์</th>
+                                <th style="padding: 12px;">ยี่ห้อ / รุ่น</th>
+                                <th style="padding: 12px;">ชื่อเครื่อง</th>
+                                <th style="padding: 12px;">วันที่ซื้อ</th>
+                                <th style="padding: 12px;">ราคา</th>
+                                <th style="padding: 12px;">สถานะประกัน</th>
+                                <th style="padding: 12px;">ชิ้นส่วน</th>
+                                <th style="padding: 12px; text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asset in assets %}
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 14px 12px; font-weight: 600;">
+                                    <a href="/software/{{ asset.id }}" style="text-decoration: none; color: inherit;">
+                                        <span style="font-family: monospace; font-size: 14px; color: #1e40af; background: #eff6ff; padding: 3px 8px; border-radius: 6px;">
+                                            {{ asset.service_tag or '-' }}
+                                        </span>
+                                    </a>
+                                </td>
+                                <td style="padding: 14px 12px;">
+                                    {% if 'คอม' in (asset.type or '') %}
+                                        <span class="type-badge type-pc">🖥️ {{ asset.type }}</span>
+                                    {% elif 'พิมพ์' in (asset.type or '') %}
+                                        <span class="type-badge type-printer">🖨️ {{ asset.type }}</span>
+                                    {% elif 'วิทยุ' in (asset.type or '') %}
+                                        <span class="type-badge type-radio">📻 {{ asset.type }}</span>
+                                    {% else %}
+                                        <span class="type-badge type-other">📦 {{ asset.type or '-' }}</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 14px 12px; color: #1e293b; font-weight: 500;">
+                                    <strong>{{ asset.brand or '' }}</strong>
+                                    {% if asset.model %}<span style="color: #64748b; font-size: 13px;">{{ asset.model }}</span>{% endif %}
+                                </td>
+                                <td style="padding: 14px 12px; color: #475569;">
+                                    {{ asset.machine_name or '-' }}
+                                </td>
+                                <td style="padding: 14px 12px; color: #64748b; font-size: 13px;">
+                                    {{ asset.buy_date.strftime('%d/%m/%Y') if asset.buy_date else '-' }}
+                                </td>
+                                <td style="padding: 14px 12px; font-weight: 500;">
+                                    {% if asset.price and asset.price > 0 %}
+                                        ฿{{ "{:,.2f}".format(asset.price) }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 14px 12px;">
+                                    {% if asset.warranty_exp %}
+                                        {% if asset.warranty_exp >= today %}
+                                            <span class="status-badge-active">มีประกัน (ถึง {{ asset.warranty_exp.strftime('%d/%m/%y') }})</span>
+                                        {% else %}
+                                            <span class="status-badge-expired">หมดประกัน</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color: #94a3b8; font-size: 12px;">-</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 14px 12px;">
+                                    {% if asset.active_components_count > 0 %}
+                                        <span style="background: #e0e7ff; color: #3730a3; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                                            🧩 {{ asset.active_components_count }} ชิ้น
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #94a3b8; font-size: 12px;">0 ชิ้น</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 14px 12px; text-align: center;">
+                                    {% if 'คอม' in (asset.type or '') or asset.active_components_count > 0 %}
+                                        <a href="/assets/assembly?pc_id={{ asset.id }}" class="btn-sm btn-outline" title="ถอด-ประกอบชิ้นส่วน">
+                                            ⚙️ จัดการชิ้นส่วน
+                                        </a>
+                                    {% else %}
+                                        <a href="/assets/assembly?pc_id={{ asset.id }}" class="btn-sm btn-outline" style="color: #64748b !important;" title="ประกอบชิ้นส่วน">
+                                            ＋ ประกอบ
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 48px; color: #94a3b8;">
+                                    ไม่พบรายการอุปกรณ์ที่ค้นหา
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if total_count > 0 %}
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        แสดง <strong>{{ start_idx }} - {{ end_idx }}</strong> จากทั้งหมด <strong>{{ total_count }}</strong> รายการ
+                        {% if total_pages > 1 %}(หน้า {{ page }} จาก {{ total_pages }}){% endif %}
+                    </div>
+                    {% if total_pages > 1 %}
+                    <div class="pagination-nav">
+                        <a href="?page=1{{ query_string }}" class="pagination-btn {% if page == 1 %}disabled{% endif %}" title="หน้าแรก">«</a>
+                        <a href="?page={{ page - 1 }}{{ query_string }}" class="pagination-btn {% if not has_prev %}disabled{% endif %}" title="หน้าก่อนหน้า">‹</a>
+
+                        {% for p in page_numbers %}
+                            {% if p == '...' %}
+                                <span class="pagination-ellipsis">...</span>
+                            {% elif p == page %}
+                                <span class="pagination-btn active">{{ p }}</span>
+                            {% else %}
+                                <a href="?page={{ p }}{{ query_string }}" class="pagination-btn">{{ p }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        <a href="?page={{ page + 1 }}{{ query_string }}" class="pagination-btn {% if not has_next %}disabled{% endif %}" title="หน้าถัดไป">›</a>
+                        <a href="?page={{ total_pages }}{{ query_string }}" class="pagination-btn {% if page == total_pages %}disabled{% endif %}" title="หน้าสุดท้าย">»</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </section>
+
+            <footer class="page-footer" style="margin-top: 40px;">
+                IT Support Team · Internal Asset Management
+            </footer>
+
+        </main>
+    </div>
+
+    <script src="/static/notifications.js" defer></script>
+</body>
+</html>
